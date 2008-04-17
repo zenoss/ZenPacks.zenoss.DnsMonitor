@@ -16,7 +16,7 @@
 # or saved.  Do not modify them directly here.
 NAME = 'ZenPacks.zenoss.DnsMonitor'
 VERSION = '2.0.0'
-AUTHOR = 'Zenoss Team'
+AUTHOR = 'Zenoss'
 LICENSE = ''
 NAMESPACE_PACKAGES = ['ZenPacks', 'ZenPacks.zenoss']
 PACKAGES = ['ZenPacks', 'ZenPacks.zenoss', 'ZenPacks.zenoss.DnsMonitor']
