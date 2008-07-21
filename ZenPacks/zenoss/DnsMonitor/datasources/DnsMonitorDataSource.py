@@ -20,6 +20,7 @@ import Products.ZenModel.RRDDataSource as RRDDataSource
 from Products.ZenModel.ZenPackPersistence import ZenPackPersistence
 from AccessControl import ClassSecurityInfo, Permissions
 from Products.ZenUtils.ZenTales import talesCompile, getEngine
+from Products.ZenUtils.Utils import binPath
 
 
 class DnsMonitorDataSource(ZenPackPersistence, RRDDataSource.RRDDataSource):
@@ -82,7 +83,7 @@ class DnsMonitorDataSource(ZenPackPersistence, RRDDataSource.RRDDataSource):
 
 
     def getCommand(self, context):
-        parts = ['check_dns']
+        parts = [binPath('check_dns')]
         if self.hostname:
             parts.append('-H "%s"' % self.hostname)
         if self.dnsServer:
@@ -90,8 +91,7 @@ class DnsMonitorDataSource(ZenPackPersistence, RRDDataSource.RRDDataSource):
         if self.expectedIpAddress:
             parts.append('-a %s' % self.expectedIpAddress)
         cmd = ' '.join(parts)
-        cmd = '$ZENHOME/libexec/' + \
-                    RRDDataSource.RRDDataSource.getCommand(self, context, cmd)
+        cmd = RRDDataSource.RRDDataSource.getCommand(self, context, cmd)
         return cmd
 
 
