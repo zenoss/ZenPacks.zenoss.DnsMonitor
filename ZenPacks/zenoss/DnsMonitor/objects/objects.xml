@@ -100,10 +100,7 @@ AVERAGE
 </object>
 </tomanycont>
 </object>
-<!-- ('', 'zport', 'dmd', 'Events', 'Perf', 'Web') -->
-<object id='/zport/dmd/Events/Perf/Web' module='Products.ZenEvents.EventClass' class='EventClass'>
-</object>
-<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'Web') -->
-<object id='/zport/dmd/Events/Status/Web' module='Products.ZenEvents.EventClass' class='EventClass'>
+<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'DNS') -->
+<object id='/zport/dmd/Events/Status/DNS' module='Products.ZenEvents.EventClass' class='EventClass'>
 </object>
 </objects>
