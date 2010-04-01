@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configure xmlns="http://namespaces.zope.org/zope">
+
+  <adapter factory=".info.DnsMonitorDataSourceInfo"
+           for=".datasources.DnsMonitorDataSource.DnsMonitorDataSource"
+           provides=".interfaces.IDnsMonitorDataSourceInfo"
+           />
+
+</configure>
