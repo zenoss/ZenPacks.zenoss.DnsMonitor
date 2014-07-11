@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE map
+  PUBLIC "urn:pubid:zenoss.com:doctypes:dita:dtd:map" "map.dtd">
+<map>
+   <title>DnsMonitor</title>
+   <topicref href="topics/DnsMonitor.dita">
+      <topicref href="topics/DnsMonitor_ref-Prerequisites.dita"/>
+      <topicref href="topics/DnsMonitor_task-Enable-Monitoring.dita"/>
+      <topicref href="topics/DnsMonitor_ref-Daemons.dita"/>
+   </topicref>
+</map>

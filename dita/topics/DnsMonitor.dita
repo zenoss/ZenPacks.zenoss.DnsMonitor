@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE reference PUBLIC "urn:pubid:zenoss.com:doctypes:dita:dtd:reference" "reference.dtd">
+<reference id="referenceid">
+  <title>(DnsMonitor) DNS Monitor</title>
+  <shortdesc>The <zenpack>ZenPacks.zenoss.DnsMonitor</zenpack> ZenPack monitors the response time of DNS requests.</shortdesc>
+  <refbody>
+    <section>
+      <p>This ZenPack uses the <cmdname>check_dns</cmdname> Nagios plugin to collect data, which in
+        turn uses the <cmdname>nslookup</cmdname> command.</p>
+    </section>
+  </refbody>
+</reference>
