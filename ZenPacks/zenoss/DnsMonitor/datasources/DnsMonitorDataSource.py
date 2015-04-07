@@ -87,6 +87,8 @@ class DnsMonitorDataSource(ZenPackPersistence, RRDDataSource.RRDDataSource):
             parts.append('-s "%s"' % self.dnsServer)
         if self.expectedIpAddress:
             parts.append('-a %s' % self.expectedIpAddress)
+        if self.timeout:
+            parts.append('-t %d' % self.timeout)
         cmd = ' '.join(parts)
         cmd = RRDDataSource.RRDDataSource.getCommand(self, context, cmd)
         return cmd
