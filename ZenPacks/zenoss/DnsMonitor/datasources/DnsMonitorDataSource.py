@@ -80,13 +80,23 @@ class DnsMonitorDataSource(ZenPackPersistence, RRDDataSource.RRDDataSource):
 
 
     def getCommand(self, context):
-        parts = [binPath('check_dns')]
-        if self.hostname:
-            parts.append('-H "%s"' % self.hostname)
-        if self.dnsServer:
-            parts.append('-s "%s"' % self.dnsServer)
-        if self.expectedIpAddress:
-            parts.append('-a %s' % self.expectedIpAddress)
+        nagios_plugin = binPath('check_dns')
+        if nagios_plugin:
+            parts = [nagios_plugin]
+            if self.hostname:
+                parts.append('-H "{}"'.format(self.hostname))
+            if self.dnsServer:
+                parts.append('-s "{}"'.format(self.dnsServer))
+            if self.expectedIpAddress:
+                parts.append('-a {}'.format(self.expectedIpAddress))
+        else:
+            parts = ['dig']
+            if self.hostname:
+                parts.append('{}'.format(self.hostname))
+            if self.dnsServer:
+                parts.append('@{}'.format(self.dnsServer))
+            if self.expectedIpAddress:
+                parts.append('% -e {}'.format(self.expectedIpAddress))
         cmd = ' '.join(parts)
         cmd = RRDDataSource.RRDDataSource.getCommand(self, context, cmd)
         return cmd
