@@ -80,7 +80,11 @@ class DnsMonitorDataSource(ZenPackPersistence, RRDDataSource.RRDDataSource):
 
 
     def getCommand(self, context):
-        parts = [binPath('check_dns')]
+        nagios_plugin = binPath('check_dns')
+        if nagios_plugin:
+            parts = [nagios_plugin]
+        else:
+            parts = [self.path('zen_check_dns.py')]
         if self.hostname:
             parts.append('-H "%s"' % self.hostname)
         if self.dnsServer:
