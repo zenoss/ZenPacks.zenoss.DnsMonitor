@@ -18,4 +18,4 @@ class IDnsMonitorDataSourceInfo(IRRDDataSourceInfo):
     hostname = schema.TextLine(title=_t(u'Host Name'))
     cycletime = schema.Int(title=_t(u'Cycle Time (seconds)'))
     dnsServer = schema.TextLine(title=_t(u'DNS Server'))
-    expectedIpAddress = schema.TextLine(title=_t(u'Expected IP Adresss'))
+    expectedIpAddress = schema.TextLine(title=_t(u'Expected IP Address'))
