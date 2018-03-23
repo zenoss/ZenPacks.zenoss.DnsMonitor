@@ -152,18 +152,22 @@ class DnsMonitorDataSourcePlugin(PythonDataSourcePlugin):
         perfData = {}
         ds0 = config.datasources[0]
         if hasattr(result.value, 'subFailure'):
-            if isinstance(result.value.subFailure.value, error.DNSNameError):
-                message = ("Domain {} was not found by the server".format(
-                    ds0.params['hostname']))
+            respTime, respTimeOrig = (None, respTime)
+            if isinstance(result.value.subFailure.value, error.DNSServerError):
+                message = "DNS WARNING - {}".format(self.resolver.pickServer()[0])
             elif isinstance(result.value.subFailure.value, InvalidAddressError):
                 message = ("DNS WARNING - "
                     "Server: {} - "
                     "InvalidAddressError".format(self.resolver.pickServer()[0]))
-                respTime = None
             elif isinstance(result.value.subFailure.value, defer.TimeoutError):
                 message = ("CRITICAL - Plugin timed out "
                     "while executing system call")
-                respTime = None                
+            elif isinstance(result.value.subFailure.value, error.DNSNameError):
+                message = "Domain {} was not found by the server".format(
+                    ds0.params['hostname'])
+                respTime = respTimeOrig
+            else:
+                message = "DNS Unknown error"
         else:
             message = '{}'.format(result.getErrorMessage())
             respTime = None
