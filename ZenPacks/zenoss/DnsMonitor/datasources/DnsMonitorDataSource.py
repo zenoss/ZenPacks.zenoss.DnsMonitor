@@ -49,11 +49,7 @@ class DnsMonitorDataSource(PythonDataSource):
     sourcetype = DNS_MONITOR
     plugin_classname = (
         ZENPACKID + '.datasources.DnsMonitorDataSource.DnsMonitorDataSourcePlugin')
-    timeout = 15
-    eventClass = '/Status/DNS'
-    hostname = '${dev/id}'
     dnsServer = ''
-    expectedIpAddress = ''
 
     _properties = PythonDataSource._properties + (
         {'id':'hostname', 'type':'string', 'mode':'w'},
