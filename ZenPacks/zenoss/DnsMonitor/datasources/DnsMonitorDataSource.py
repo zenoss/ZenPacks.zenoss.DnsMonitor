@@ -51,7 +51,7 @@ class DnsMonitorDataSource(PythonDataSource):
         ZENPACKID + '.datasources.DnsMonitorDataSource.DnsMonitorDataSourcePlugin')
     timeout = 15
     eventClass = '/Status/DNS'
-    hostname = '${dev/titleOrId}'    
+    hostname = '${dev/titleOrId}'
     dnsServer = ''
     expectedIpAddress = ''
 
