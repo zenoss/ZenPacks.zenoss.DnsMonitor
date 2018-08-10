@@ -62,6 +62,10 @@ class DnsMonitorDataSource(PythonDataSource):
         {'id':'timeout', 'type':'int', 'mode':'w'},
         )
 
+    def addDataPoints(self):
+        if not self.datapoints._getOb('time', None):
+            self.manage_addRRDDataPoint('time')
+
 
 class DnsMonitorDataSourcePlugin(PythonDataSourcePlugin):
 
