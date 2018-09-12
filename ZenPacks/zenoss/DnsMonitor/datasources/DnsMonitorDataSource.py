@@ -1,10 +1,10 @@
 ##############################################################################
-# 
+#
 # Copyright (C) Zenoss, Inc. 2017, all rights reserved.
-# 
+#
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
-# 
+#
 ##############################################################################
 
 
@@ -14,9 +14,9 @@ Defines datasource for DnsMonitor
 '''
 
 import time
-
+import socket
 from twisted.internet import defer
-from twisted.names import client, error
+from twisted.names import client, error, dns
 from twisted.internet.error import InvalidAddressError
 
 from zope.component import adapts
@@ -40,6 +40,44 @@ class DnsException(Exception):
     """
     Dns Exception.
     """
+
+def extractIPv4Records(resolver, name, answers, level=10):
+    if not level:
+        return None
+    if hasattr(socket, 'inet_ntop'):
+        for r in answers:
+            if r.name == name and r.type == dns.A6:
+                return socket.inet_ntop(socket.AF_INET6, r.payload.address)
+    for r in answers:
+        if r.name == name and r.type == dns.A:
+            return socket.inet_ntop(socket.AF_INET, r.payload.address)
+    for r in answers:
+        if r.name == name and r.type == dns.CNAME:
+            result = extractIPv4Records(
+                resolver, r.payload.name, answers, level - 1)
+            if not result:
+                return resolver.getHostByName(
+                    str(r.payload.name), effort=level - 1)
+            return result
+    # No answers, but maybe there's a hint at who we should be asking about
+    # this
+    for r in answers:
+        if r.type == dns.NS:
+            from twisted.names import client
+            r = client.Resolver(servers=[(str(r.payload.name), dns.PORT)])
+            return r.lookupAddress(str(name)
+                ).addCallback(
+                lambda (ans, auth, add):
+                extractIPv4Records(r, name, ans + auth + add, level - 1))
+
+
+class DNSMonitor(client.Resolver):
+    def _cbRecords(self, records, name, effort):
+        (ans, auth, add) = records
+        result = extractIPv4Records(self, dns.Name(name), ans + auth + add, effort)
+        if not result:
+            raise error.DNSLookupError(name)
+        return result
 
 
 class DnsMonitorDataSource(PythonDataSource):
@@ -89,7 +127,7 @@ class DnsMonitorDataSourcePlugin(PythonDataSourcePlugin):
             datasource.eventClass, context)
 
         params['timeout'] = datasource.talesEval(
-            datasource.timeout, context)  
+            datasource.timeout, context)
 
         return params
 
@@ -99,12 +137,12 @@ class DnsMonitorDataSourcePlugin(PythonDataSourcePlugin):
         hostname = ds0.params['hostname']
         timeout = int(ds0.params['timeout'])
         if dnsServer:
-            self.resolver = client.Resolver(servers=[(dnsServer, 53)])
+            self.resolver = DNSMonitor(servers=[(dnsServer, 53)])
         else:
-            self.resolver = client.Resolver('/etc/resolv.conf')
+            self.resolver = DNSMonitor('/etc/resolv.conf')
 
         self._startTime = time.time()
-        d = defer.gatherResults([self.resolver.lookupAddress(
+        d = defer.gatherResults([self.resolver.getHostByName(
             hostname, timeout=[timeout])], consumeErrors=True)
 
         return d
@@ -115,18 +153,16 @@ class DnsMonitorDataSourcePlugin(PythonDataSourcePlugin):
         perfData = {}
         perfData['time'] = respTime
         ds0 = config.datasources[0]
+        hostname = ds0.params['hostname']
         expectedIpAddress = ds0.params['expectedIpAddress']
 
-        answers, authority, additional = results[0]
-        x = answers[0]
-        hostname = x.name.name
-        receivedIp = x.payload.dottedQuad()
+        receivedIp = results[0]
         if expectedIpAddress and expectedIpAddress != receivedIp:
             message = ("DNS CRITICAL - "
                 "expected '{}' but got '{}'".format(
                     expectedIpAddress, receivedIp))
             raise DnsException(message)
-           
+
         message = ("DNS OK: "
             "{:.3f} seconds response time. "
             "{} returns {}".format(respTime, hostname, receivedIp))
@@ -175,7 +211,7 @@ class DnsMonitorDataSourcePlugin(PythonDataSourcePlugin):
         else:
             message = '{}'.format(result.getErrorMessage())
             respTime = None
-        
+
         log.error('{} {}'.format(config.id, message))
 
         if respTime:
