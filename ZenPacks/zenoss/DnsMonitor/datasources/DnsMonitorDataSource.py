@@ -133,7 +133,7 @@ class DnsMonitorDataSourcePlugin(PythonDataSourcePlugin):
             raise DnsException(message)
 
         if not hostname:
-            hostname = config.id
+            hostname = ds0.params['hostname']
         if len(receivedIps) == 1:
             receivedIps = receivedIps[0]
 
