@@ -119,8 +119,12 @@ class DnsMonitorDataSourcePlugin(PythonDataSourcePlugin):
         for x in answers:
             if x.type != RECORD_A:      # Further code is expecting a dottedQuad anyway
                 continue
-            hostname = x.name.name      # TODO: should be a list ?
-            receivedIps.append(x.payload.dottedQuad())
+            receivedIp = x.payload.dottedQuad()
+            receivedIps.append(receivedIp)
+            if expectedIpAddress and expectedIpAddress == receivedIp:
+                hostname = x.name.name
+                receivedIps = [receivedIp]
+                break
 
         if expectedIpAddress and expectedIpAddress not in receivedIps:
             message = ("DNS CRITICAL - "
@@ -130,7 +134,9 @@ class DnsMonitorDataSourcePlugin(PythonDataSourcePlugin):
 
         if not hostname:
             hostname = config.id
-           
+        if len(receivedIps) == 1:
+            receivedIps = receivedIps[0]
+
         message = ("DNS OK: "
             "{:.3f} seconds response time. "
             "{} returns {}".format(respTime, hostname, receivedIps))
