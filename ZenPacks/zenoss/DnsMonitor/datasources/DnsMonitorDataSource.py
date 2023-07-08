@@ -34,7 +34,7 @@ from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource \
 
 import logging
 log = logging.getLogger('zen.DnsMonitor')
-
+RECORD_A = 1
 
 class DnsException(Exception):
     """
@@ -114,18 +114,32 @@ class DnsMonitorDataSourcePlugin(PythonDataSourcePlugin):
         expectedIpAddress = ds0.params['expectedIpAddress']
 
         answers, authority, additional = results[0]
-        x = answers[0]
-        hostname = x.name.name
-        receivedIp = x.payload.dottedQuad()
-        if expectedIpAddress and expectedIpAddress != receivedIp:
+        receivedIps = []
+        hostname = ''
+        for x in answers:
+            if x.type != RECORD_A:      # Further code is expecting a dottedQuad anyway
+                continue
+            receivedIp = x.payload.dottedQuad()
+            receivedIps.append(receivedIp)
+            if expectedIpAddress and expectedIpAddress == receivedIp:
+                hostname = x.name.name
+                receivedIps = [receivedIp]
+                break
+
+        if expectedIpAddress and expectedIpAddress not in receivedIps:
             message = ("DNS CRITICAL - "
                 "expected '{}' but got '{}'".format(
-                    expectedIpAddress, receivedIp))
+                    expectedIpAddress, receivedIps))
             raise DnsException(message)
-           
+
+        if not hostname:
+            hostname = ds0.params['hostname']
+        if len(receivedIps) == 1:
+            receivedIps = receivedIps[0]
+
         message = ("DNS OK: "
             "{:.3f} seconds response time. "
-            "{} returns {}".format(respTime, hostname, receivedIp))
+            "{} returns {}".format(respTime, hostname, receivedIps))
 
         log.debug('{} {}'.format(config.id, message))
 
@@ -133,7 +147,7 @@ class DnsMonitorDataSourcePlugin(PythonDataSourcePlugin):
             if dp.id in perfData:
                 data['values'][None][dp.id] = perfData[dp.id]
 
-        eventKey = ds0.eventKey  or 'DnsMonitor'
+        eventKey = ds0.eventKey or 'DnsMonitor'
 
         data['events'].append({
             'eventKey': eventKey,
